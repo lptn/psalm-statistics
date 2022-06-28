@@ -3,20 +3,19 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-
-    totallyTyped="true"
 >
     <projectFiles>
         <directory name="." />
         <ignoreFiles>
             <directory name="vendor" />
-            <directory name="tests/_support/_generated" />
-            <directory name="tests/_run" />
         </ignoreFiles>
     </projectFiles>
 
     <issueHandlers>
         <LessSpecificReturnType errorLevel="info" />
+        <InternalClass errorLevel="info" />
+        <InternalMethod errorLevel="info" />
+        <InternalProperty errorLevel="info" />
     </issueHandlers>
 
     <plugins>

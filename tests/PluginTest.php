@@ -1,50 +1,75 @@
 <?php
 
-namespace Weirdan\PsalmPluginSkeleton\Tests;
+declare(strict_types=1);
 
-use SimpleXMLElement;
-use Weirdan\PsalmPluginSkeleton\Plugin;
+namespace Lptn\PsalmStatisticsPlugin\Tests;
+
+use Psalm\Codebase;
+use Psalm\Config;
+use Psalm\Internal\Analyzer\IssueData;
+use Psalm\Internal\Provider\FileProvider;
+use Psalm\Internal\Provider\Providers;
+use Psalm\Plugin\EventHandler\Event\AfterAnalysisEvent;
+use Lptn\PsalmStatisticsPlugin\Plugin;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
-use Psalm\Plugin\RegistrationInterface;
 
-class PluginTest extends TestCase
+final class PluginTest extends TestCase
 {
-    use ProphecyTrait;
-
-    /**
-     * @var ObjectProphecy<RegistrationInterface>
-     */
-    private $registration;
-
-    /**
-     * @return void
-     */
-    public function setUp(): void
+    public function testIt(): void
     {
-        $this->registration = $this->prophesize(RegistrationInterface::class);
+        putenv('PSALM_STATISTICS_ENDPOINT=http://localhost');
+        $event = $this->buildEvent();
+
+        ob_start();
+        Plugin::afterAnalysis($event);
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertSame('', $output);
     }
 
-    /**
-     * @test
-     * @return void
-     */
-    public function hasEntryPoint()
+    private function buildEvent(): AfterAnalysisEvent
     {
-        $this->expectNotToPerformAssertions();
-        $plugin = new Plugin();
-        $plugin($this->registration->reveal(), null);
+        $issue = new IssueData(
+            Config::REPORT_ERROR,
+            1,
+            100,
+            'type',
+            'message',
+            'file_name',
+            'file_path',
+            'file_snippet',
+            'selected_text',
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        );
+        return new AfterAnalysisEvent(
+            new Codebase($this->buildConfig(), new Providers(new FileProvider())),
+            ['file.php' => [$issue]],
+            [],
+            null
+        );
     }
 
-    /**
-     * @test
-     * @return void
-     */
-    public function acceptsConfig()
+    private function buildConfig(): Config
     {
-        $this->expectNotToPerformAssertions();
-        $plugin = new Plugin();
-        $plugin($this->registration->reveal(), new SimpleXMLElement('<myConfig></myConfig>'));
+        return \Psalm\Config::loadFromXML(
+            dirname(__DIR__, 1),
+            '<?xml version="1.0"?>
+                <psalm
+                    errorLevel="1"
+                >
+                    <projectFiles>
+                        <directory name="tests/fixtures/DummyProject" />
+                    </projectFiles>
+                    <plugins>
+                        <pluginClass class="\\Lptn\\PsalmStatisticsPlugin\\Plugin" />
+                    </plugins>
+                </psalm>'
+        );
     }
 }

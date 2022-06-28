@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="invajo">
+<ruleset name="lptn">
     <!-- display progress -->
     <arg value="p"/>
     <arg name="colors"/>
@@ -27,5 +27,13 @@
         <properties>
             <property name="ignoreBlankLines" value="false"/>
         </properties>
+    </rule>
+
+    <rule ref="PSR12.Files.FileHeader.SpacingAfterBlock">
+        <exclude-pattern>tests/_run</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR2.Files.EndFileNewline.NoneFound">
+        <exclude-pattern>tests/_run</exclude-pattern>
     </rule>
 </ruleset>
